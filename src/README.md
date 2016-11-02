@@ -1,4 +1,4 @@
-this is the README.mThis file should briefly summarize your project. In particular,
+This is the README.mThis file should briefly summarize your project. In particular,
 it must include a list of known bugs. If you do not have any known bugs, 
 then you probably havenot sufficiently tested your code£¡
 
