@@ -33,5 +33,18 @@ for semicolons and the commentHandler truncates the commands after the #.
 Finally the handler function is the special exit function Ctrl C.
 
 Currently, the program cannot handle strings with spaces. However, the program
-can handle spaces when input from the shell. When a command fails, || 
-and ; do not run. || also runs even if the previous command does not fail.
+can handle spaces when input from the shell. When testing through shell, the
+output of the shell is different than manual inputs into the rshell console.
+
+For example, if we have
+
+echo aa#sadd 
+
+inside our shell, the output is 
+
+aa#sadd
+
+However, when manually input into the rshell console, the output is
+
+aa
+
