@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
 		UserCommand* cmd = new UserCommand(c); //set char* to UserCommand
 
 		if (cmd->isEmpty()) { //check if empty
-			exit(0);
+			continue;
 		}
 
 		SeperatedCmd* scmd = new SeperatedCmd(cmd); //split the commands into separate commands
@@ -89,7 +89,7 @@ void test(SeperatedCmd* scmd) {
 	cout << endl;
 }
 
-void handler(int number) {
+void handler(int number) { //special exit function
 	if (number == SIGINT)
 	{
 		exit(0);
