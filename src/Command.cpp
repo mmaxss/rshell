@@ -27,6 +27,14 @@ public:
 		return cmd;
 	}
 
+	bool isExit() {
+		string str(cmd);
+		if (str == "exit") {
+			return true;
+		}
+		return false;
+	}
+
 	bool isSpecial() { //bool function to tell if certain cmd object is special connectors;
 		string str(cmd);
 		if ((str == "||") || (str == "&&") || (str == ";")) {
@@ -200,19 +208,14 @@ public:
 	}
 
 	unsigned execute(int i) {
+		if (cmds.at(i)->cmds.at(0)->isExit()) {
+			exit(0);
+		}
 		char* firstWord = cmds.at(i)->cmds.at(0)->getContent();
-		// string str = getString(i);
-		// char * c = new char[str.size() + 1];
-		// copy(str.begin(), str.end(), c);
-		// c[str.size()] = '\0';
-
-		// char* cpp[] = {c} ;
-
 		char** cpp = new char*[cmds.at(i)->cmds.size()];
 
 		for (unsigned j = 0; j < cmds.at(i)->cmds.size(); ++j) {
 			cpp[j] = new char[100];
-
 			cpp[j] = cmds.at(i)->cmds.at(j)->getContent();
 		}
 
