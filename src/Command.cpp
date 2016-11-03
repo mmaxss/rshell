@@ -27,7 +27,15 @@ public:
 		return cmd;
 	}
 
-	bool isSpecial() { //changed the name from Specail to Special
+	bool isExit() {
+		string str(cmd);
+		if (str == "exit") {
+			return true;
+		}
+		return false;
+	}
+
+	bool isSpecial() { //bool function to tell if certain cmd object is special connectors;
 		string str(cmd);
 		if ((str == "||") || (str == "&&") || (str == ";")) {
 			return true;
@@ -51,20 +59,20 @@ public:
 		mult = false;
 	}
 
-	UserCommand(char* c) {
+	UserCommand(char* c) {  //takes a char* and generate a new UserCommand object to store individual cmds.
 		mult = false;
 		char* pch;
 
 		pch = strtok(c, " "); //breaks the sentence when seeing the "" echo "hello" 
 
 		while (pch != NULL) {
-			cmds.push_back(new Command(pch));
+			cmds.push_back(new Command(pch)); // get a new cmd object and store into vector.
 			pch = strtok(NULL, " ");
 		}
 		this->isMultiple();
 	}
 
-	UserCommand(vector<Command*> cmds) {
+	UserCommand(vector<Command*> cmds) { //generate another UserCommand object which contains the same cmds;
 		mult = false;
 		this->cmds = cmds;
 		this->isMultiple();
@@ -77,7 +85,7 @@ public:
 	}
 
 
-	bool isMultiple() {
+	bool isMultiple() { // bool function to tell if it is single command or multiple commands.
 		for (unsigned i = 0; i < cmds.size(); ++i) {
 			if (cmds.at(i)->isSpecial()) {
 				return true;
@@ -87,7 +95,7 @@ public:
 		return false;
 	}
 
-	bool isEmpty() {
+	bool isEmpty() { // if the UserCommand is empty.
 		if (cmds.size() == 0) {
 			return true;
 		}
@@ -103,7 +111,7 @@ public:
 
 //format to seperated sentence of commands.
 //e.g. : a b || c will be broken down to a b and c.
-class SeperatedCmd { //should be : public UserCommand
+class SeperatedCmd {
 public:
 	vector<UserCommand*> cmds;
 	vector<int> connectors;
@@ -111,7 +119,7 @@ public:
 	UserCommand* singleCmds;
 	UserCommand* temp;
 
-
+	//takes UserCommand and breaks it down into seperated commands if it is multiple commands in one line.
 	SeperatedCmd(UserCommand* user) {
 		if (user->isMultiple()) {
 			connectors.push_back(1);                                        //the first element in connectors means whether there are multiple command lines: 1 means there is.
@@ -156,7 +164,7 @@ public:
 		}
 	}
 
-	void setConnectors(char* c) {
+	void setConnectors(char* c) {   // set the vector of connectors into corresponding values.
 		string str(c);
 
 		if (str == ";") {
@@ -182,37 +190,32 @@ public:
 
 	void executeAll() {
 		for (unsigned i = 0; i < cmds.size(); ++i) {
-			if (execute(i) == -1) {
-				if (connectors.size() >= (i + 1)) {
-					if (connectors.at(i) == 1) {
-						break;
+			unsigned flag = execute(i);
+			if (connectors.size() >(i + 1)) {
+				if (flag == 1) {
+					if (connectors.at(i + 1) == 1) {
+						i += 1;
+					}
+				}
+				else if (flag == 0) {
+					if (connectors.at(i + 1) == 2) {
+						i += 1;
 					}
 				}
 			}
-			else {
-				if (connectors.size() >= (i + 1)) {
-					if (connectors.at(i) == 2) {
-						break;
-					}
-				}
-			}
+
 		}
 	}
 
-	int execute(int i) {
+	unsigned execute(int i) {
+		if (cmds.at(i)->cmds.at(0)->isExit()) {
+			exit(0);
+		}
 		char* firstWord = cmds.at(i)->cmds.at(0)->getContent();
-		// string str = getString(i);
-		// char * c = new char[str.size() + 1];
-		// copy(str.begin(), str.end(), c);
-		// c[str.size()] = '\0';
-
-		// char* cpp[] = {c} ;
-
 		char** cpp = new char*[cmds.at(i)->cmds.size()];
 
 		for (unsigned j = 0; j < cmds.at(i)->cmds.size(); ++j) {
 			cpp[j] = new char[100];
-
 			cpp[j] = cmds.at(i)->cmds.at(j)->getContent();
 		}
 
@@ -223,9 +226,10 @@ public:
 			if (execvp(firstWord, cpp) == -1) //execute command if no error
 			{
 				perror("error"); //NEED TO KEEP PERRO
-				return -1;
+				return 1;
 			}
 			else {
+				cout << "right" << endl;
 				return 0;
 			}
 		}
@@ -234,7 +238,6 @@ public:
 				perror("wait");
 			}
 		}
-
 		return 0;
 	}
 
