@@ -1,12 +1,12 @@
 all: Command_Line rshell
 
 
-rshell: main.o Command.o
+rshell: src/main.o src/Command.o
 	mkdir bin
 	cd bin
 	g++ src/main.o src/Command.o -o bin/rshell
 	
-Command_Line: main.o Command.o
+Command_Line: src/main.o src/Command.o
 	g++ src/main.o src/Command.o -o Command_Line
 
 main.o: src/main.cpp
