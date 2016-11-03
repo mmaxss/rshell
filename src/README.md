@@ -1,6 +1,19 @@
-this is the README.mThis file should briefly summarize your project. In particular,
-it must include a list of known bugs. If you do not have any known bugs, 
-then you probably havenot sufficiently tested your code£¡
+Copyright (C) 2016  Xufei Wang, Andrew Apostol
+
+    This file is part of Command.
+    Command is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 The purpose of this project is to create a command shell using c++ composite 
 pattern. This command shell takes in a set of commands and executes them 
@@ -19,5 +32,6 @@ the Command.cpp, so they are implemented in main.cpp The semicolonHandler checks
 for semicolons and the commentHandler truncates the commands after the #.
 Finally the handler function is the special exit function Ctrl C.
 
-Currently, echo cannot handle strings with spaces. When a command fails, || 
-and ; do not run. 
+Currently, the program cannot handle strings with spaces. However, the program
+can handle spaces when input from the shell. When a command fails, || 
+and ; do not run. || also runs even if the previous command does not fail.
