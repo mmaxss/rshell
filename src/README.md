@@ -14,37 +14,30 @@ Copyright (C) 2016  Xufei Wang, Andrew Apostol
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+The purpose of this project is to create a test function with the flags of 
+-e, -f, and -d, with -e being the default flag. The -e flag checks whether 
+the argument exists as a file ordirectory. The -f flag checks whether the 
+argument exists as a file. The -d flag checks whether the argument exists 
+as a directory.
 
-The purpose of this project is to create a command shell using c++ composite 
-pattern. This command shell takes in a set of commands and executes them 
-according to the connectors. It is able to handle multiple commands at once.
+This project also implements the precedence operator of (). The () operator 
+changes the order of returns of the commands. 
 
+To implement the test functionality, the execute function in the Command class
+checks whether the command is test. Next it has if else statements checking for
+which flag is input. Everything after the flag is checked based on the S_ISDIR
+and the S_ISREG functions from the struct status. 
 
-In Command.cpp, we use 2 composite classes, UserCommand and 
-SeperatedCmd and a base class Command. UserCommand has a vector of Commands
-that keeps track of information such as multiple, special characters, and 
-empty vectors. SeperatedCmd is a composite of user commands that splits
-commands from arguments. SeparateCmd also executes these commands after 
-separating them from their arguments through the fork() function.
+To implement the [] as an alternate way to test functions. We look for the [ 
+when taking in input. Everything after the [ until the ] is taken and run 
+through the execute function. 
 
-In main.cpp there are 3 functions. There were errors implementing them into
-the Command.cpp, so they are implemented in main.cpp The semicolonHandler checks
-for semicolons and the commentHandler truncates the commands after the #.
-Finally the handler function is the special exit function Ctrl C.
+The () operator is immplemented in a similar fashion to the [] function. We 
+look for the ( when taking in input, then everything until ) is run through
+the parse function. 
 
-Currently, the program cannot handle strings with spaces. However, the program
-can handle spaces when input from the shell. When testing through shell, the
-output of the shell is different than manual inputs into the rshell console.
-
-For example, if we have
-
-echo aa#sadd 
-
-inside our shell, the output is 
-
-aa#sadd
-
-However, when manually input into the rshell console, the output is
-
-aa
-
+Currently, the program cannot handle stacking incomplete precedence operators 
+with an incomplete test operator and a connector. For example, if the user 
+inputs ( [ echo aa || , then the program will do nothing. The precedence 
+operators and test operators were implemented without the other in mind, so
+when bug testing problems can arise. 
