@@ -14,37 +14,33 @@ Copyright (C) 2016  Xufei Wang, Andrew Apostol
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+The purpose of this project is to implement the cd command. The cd command has
+3 functions. cd <PATH> will change the current directory to <PATH> if it exists.
+cd will change the current directory to the home directory. cd - will change 
+the current working directory to the previous working directory. 
 
-The purpose of this project is to create a command shell using c++ composite 
-pattern. This command shell takes in a set of commands and executes them 
-according to the connectors. It is able to handle multiple commands at once.
+This project also implements the display of the current working directory.
 
+To implement the test functionality, the execute function in the Command class
+checks whether the command is cd. Next, function of cd is checked. 
 
-In Command.cpp, we use 2 composite classes, UserCommand and 
-SeperatedCmd and a base class Command. UserCommand has a vector of Commands
-that keeps track of information such as multiple, special characters, and 
-empty vectors. SeperatedCmd is a composite of user commands that splits
-commands from arguments. SeparateCmd also executes these commands after 
-separating them from their arguments through the fork() function.
+First, if nothing is parsed into cpp[1], then the home directory function is 
+called. The directory is changed to the HOME directory. Then the OLDPWD is
+updated to the previous directory. Finally PWD is updated to the HOME directory. 
 
-In main.cpp there are 3 functions. There were errors implementing them into
-the Command.cpp, so they are implemented in main.cpp The semicolonHandler checks
-for semicolons and the commentHandler truncates the commands after the #.
-Finally the handler function is the special exit function Ctrl C.
+Second, the cd - function is checked. If - is in cpp[1], then the directory is
+changed into the OLDPWD. Then the OLDPWD and PWD values are swapped. 
 
-Currently, the program cannot handle strings with spaces. However, the program
-can handle spaces when input from the shell. When testing through shell, the
-output of the shell is different than manual inputs into the rshell console.
+Finally, if neither cd nor cd - runs, the cd <PATH> function is executed. The
+directory is changed into the one specified. To update the PWD, a 
+temporary string concatenates PWD with the input directory. The OLDPWD is given
+the value of ppath. 
 
-For example, if we have
+The display of the current directory was tacked onto line 17 of main.cpp which
+also outputs the $.
 
-echo aa#sadd 
-
-inside our shell, the output is 
-
-aa#sadd
-
-However, when manually input into the rshell console, the output is
-
-aa
-
+Currently, the program cannot handle stacking incomplete precedence operators 
+with an incomplete test operator and a connector. For example, if the user 
+inputs ( [ echo aa || , then the program will do nothing. The precedence 
+operators and test operators were implemented without the other in mind, so
+when bug testing problems can arise. 

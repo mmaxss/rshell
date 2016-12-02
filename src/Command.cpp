@@ -16,41 +16,44 @@ using namespace std;
 
 
 //stores individual commands
-//(currently has no way to deal with special characters)
 class Command {
 
 public:
 	char* cmd;
 	char* cpp[10];
 
-	Command(char* c) {                                                      //set cmd to c
+	Command(char* c) {                                                      //set cmd to char pointer cmd in Command data field
 		cmd = c;
 		this->parse();
 	}
 
-	char* getContent() {                                                     //return 
+	char* getContent() {                                                     //return char pointer which contains the command.
 		return cmd;
 	}
 
-	int execute() {
+	int execute() {                                                         //check if this command is test and execute the command
 		string str(cpp[0]);
-		if (str == "test") {
+		if (str == "test") {                                                  //call executeTest if true
 			executeTest();
+			return 0;
+		}
+		else if (str == "cd") {                                             //call executeCd if true
+			executeCd();
 			return 0;
 		}
 
 		pid_t pid = fork();
 
-		if (pid == 0) {  //child
-			if (execvp(cpp[0], cpp) == -1) {
+		if (pid == 0) {                                                     //child process
+			if (execvp(cpp[0], cpp) == -1) {                                //return 1 if fails
 				perror("error");
 				return 1;
 			}
-			else {
+			else {                                                          //return 0 otherwise
 				return 0;
 			}
 		}
-		if (pid > 0) {   //parent
+		if (pid > 0) {                                                      //parent
 			if (wait(0) == -1) {   //wait for child to finish
 				perror("wait");
 			}
@@ -60,7 +63,7 @@ public:
 
 
 
-	void parse() {
+	void parse() {                                                           //parse the command and mark every place with cpp
 		cpp[0] = cmd;
 
 
@@ -82,10 +85,10 @@ public:
 
 		pid_t pid = fork();
 
-		if (pid == 0) {  //child
+		if (pid == 0) {                                                     //child
 
 			string testFlag(cpp[1]);
-			if (testFlag == "-f") { // check if file exists and is a regular file
+			if (testFlag == "-f") {                                         // check if file exists and is a regular file
 				struct stat File;
 				string argument(cpp[2]);
 				unsigned i = 3;
@@ -97,7 +100,7 @@ public:
 
 				char* c = strdup(argument.c_str());
 				stat(c, &File);
-				if (S_ISREG(File.st_mode)) { // if the file exists, output true
+				if (S_ISREG(File.st_mode)) {                                // if the file exists, output true
 					cout << "(True)" << endl;
 				}
 
@@ -106,7 +109,7 @@ public:
 				}
 			}
 
-			else if (testFlag == "-d") { // check if directory exists and is a directory
+			else if (testFlag == "-d") {                                    // check if directory exists and is a directory
 				struct stat dir;
 				string argument(cpp[2]);
 				unsigned i = 3;
@@ -118,7 +121,7 @@ public:
 
 				char* c = strdup(argument.c_str());
 				stat(c, &dir);
-				if (S_ISDIR(dir.st_mode)) { // if the directory exists, output true
+				if (S_ISDIR(dir.st_mode)) {                                 // if the directory exists, output true
 					cout << "(True)" << endl;
 				}
 				else {
@@ -126,7 +129,7 @@ public:
 				}
 			}
 
-			else if (testFlag == "-e") { // check if the file or directory exists with -e flag
+			else if (testFlag == "-e") {                                    // check if the file or directory exists with -e flag
 				struct stat exist;
 				string argument(cpp[2]);
 				unsigned i = 3;
@@ -138,10 +141,10 @@ public:
 
 				char* c = strdup(argument.c_str());
 				stat(c, &exist);
-				if (S_ISDIR(exist.st_mode)) { // if it is a directory
+				if (S_ISDIR(exist.st_mode)) {                               // if it is a directory
 					cout << "(True)" << endl;
 				}
-				else if (S_ISREG(exist.st_mode)) { // if it is a file
+				else if (S_ISREG(exist.st_mode)) {                          // if it is a file
 					cout << "(True)" << endl;
 				}
 				else { // if neither
@@ -162,10 +165,10 @@ public:
 
 				char* c = strdup(argument.c_str());
 				stat(c, &exist);
-				if (S_ISDIR(exist.st_mode)) { // if it is a directory
+				if (S_ISDIR(exist.st_mode)) {                               // if it is a directory
 					cout << "(True)" << endl;
 				}
-				else if (S_ISREG(exist.st_mode)) { // if it is a file
+				else if (S_ISREG(exist.st_mode)) {                          // if it is a file
 					cout << "(True)" << endl;
 				}
 				else { // if neither
@@ -177,8 +180,69 @@ public:
 			return 0;
 		}
 
-		if (pid > 0) {   //parent
-			if (wait(0) == -1) {   //wait for child to finish
+		else if (pid > 0) {                                                 //parent
+			if (wait(0) == -1) {                                            //wait for child to finish
+				perror("wait");
+			}
+		}
+		return 0;
+	};
+
+	int executeCd() {                                                       //if <PATH> is given, change to that path
+																			//if no <PATH> is given, go to home directory
+		pid_t pid = fork();                                                 //if -, change to previous working directory
+
+		if (pid == 0) {                                                     //if in the child function                                             
+			char* ppath = NULL;
+			ppath = getenv("PWD");                                          //set ppath to PWD
+			if (ppath == NULL) {                                            //error check getenv
+				perror("getenv");
+			}
+			if (cpp[1] == NULL) {                                           //go to home directory
+				if (setenv("OLDPWD", ppath, 1) == -1) {                     //set OLDPWD to PWD
+					perror("setenv");                                       //error check setenv
+				}
+				chdir(getenv("HOME"));                                      //go to home directory
+				if (setenv("PWD", "HOME", 1) == -1) {                       //set PWD to the home directory
+					perror("setenv");                                       //error check setenv
+				}
+			}
+			else {
+				string chgdir(cpp[1]);
+				if (chgdir == "-") {                                        //go to previous directory
+					chdir(getenv("OLDPWD"));                                //go to OLDPWD
+					ppath = getenv("OLDPWD");                               //set ppath to OLDPWD
+					if (ppath == NULL) {                                    //error check getenv
+						perror("getenv");
+					}
+					if (setenv("OLDPWD", getenv("PWD"), 1) == -1) {         //set OLDPWD to PWD
+						perror("setenv");                                   //error check setenv
+					}
+
+					if (setenv("PWD", ppath, 1) == -1) {                    //set PWD to the ppath
+						perror("setenv");                                   //error check setenv
+					}
+				}
+				else {                                                      //go to directory stated
+					if (chdir(chgdir.c_str()) == -1) {
+						cout << "error: No such file or directory" << endl;
+						return 1;
+					}
+					else {
+						string temp(ppath);                                 //concatenate ppath with input
+						temp = temp + "/" + chgdir;
+						if (setenv("PWD", temp.c_str(), 1) == -1) {          //set PWD to concatenation
+							perror("setenv");
+						}
+						if (setenv("OLDPWD", ppath, 1) == -1) {             //set OLDPWD to ppath
+							perror("setenv");
+						}
+					}
+				}
+			}
+		}
+		else if (pid > 0) {                                                 //parent
+			if (wait(0) == -1) {                                            //wait for child to finish
 				perror("wait");
 			}
 		}
@@ -187,15 +251,15 @@ public:
 };
 
 /*stores a vector of commands, then executes the commands based on the
-connectors*/
+connectors. Does not contain () which will be handled in multipleCmdl*/
 class commandList {
 
 public:
-	vector<Command*> commands;
-	vector<int> connectors;
+	vector<Command*> commands;                                              //individual commands will be stored inside this vectors
+	vector<int> connectors;                                                 //holds ints to distinguish every connectors for their corresponding commands
 	string str;
 
-	commandList(const string& str) {
+	commandList(const string& str) {                                         //store the whole string of commands into str
 		this->str = str;
 		testHandler();
 		setConnectors();
@@ -206,7 +270,7 @@ public:
 		commands.push_back(c);
 	}
 
-	int execute() {                                                         //execute all the commands
+	int execute() {                                                         //execute all the commands depending on their corresponding connectors and returned flag of the preview one
 		int prev = 0;
 		for (unsigned i = 0; i < commands.size(); ++i) {
 			unsigned flag = commands.at(i)->execute();
@@ -262,7 +326,7 @@ public:
 		}
 	}
 
-	void testHandler() {                                                     //replace [xxxx] by "test xxxx"; 
+	void testHandler() {                                                     //replace [xxxx] by "test xxxx" to execute them as the normal test command
 		for (unsigned i = 0; i < str.size(); ++i) {
 			if (str.at(i) == '[') {
 				for (unsigned j = i; j < str.size(); ++j) {
@@ -287,7 +351,7 @@ public:
 		}
 	}
 
-	bool isMultiple() {
+	bool isMultiple() {                                                      // check if the str contains more than one commands
 		int j = 0;
 		int i = findSpecial(str, j);
 		bool flag;
@@ -317,7 +381,7 @@ public:
 		}
 	}
 
-	int findSpecial(const string& str, int& length) {
+	int findSpecial(const string& str, int& length) {                        //return the index of first connector
 		char* ch;
 		for (unsigned i = 0; i < str.length(); ++i) {
 			ch = new char(str.at(i));
@@ -334,7 +398,7 @@ public:
 		return -1;
 	}
 
-	bool isSpecial(char* c) {
+	bool isSpecial(char* c) {                                                // check if one char is connector
 		bool flag;
 		if ((*c == '|') || (*c == '&') || (*c == ';')) {
 			flag = true;
@@ -345,21 +409,26 @@ public:
 		return flag;
 	}
 };
-//should probably comment this stuff
+
+
+/*
+it holds a whole string of commands with or without ().
+Make commandList objects once there is commands inside () and excute them.
+*/
 class multipleCmdl {
 public:
 	vector<commandList*> cmls;
 	vector<int> connectors;
 	string str;
 
-	multipleCmdl(const string& str) {
+	multipleCmdl(const string& str) {                                        //store the string of commands into str
 		this->str = str;
 		strFormat();
 		parse();
 
 	}
 
-	void parse() {
+	void parse() {                                                           //format the string. Create commandList objects storing in vector cmls
 		unsigned i = 0;
 
 		connectors.push_back(1);
@@ -401,11 +470,11 @@ public:
 		}
 	}
 
-	void setConnectors(int i) {
+	void setConnectors(int i) {                                              //set the corresponding connectors.
 		connectors.push_back(i);
 	}
 
-	void strFormat() {
+	void strFormat() {                                                       //handle the spaces inside string and make strings unified.
 		std::size_t found = str.find(";");
 		while (found != string::npos) {
 			if (str.at(found + 1) == ' ') {
@@ -450,7 +519,7 @@ public:
 		}
 	}
 
-	void execute() {
+	void execute() {                                                         //execute all the commands depending on their corresponding connectors and returned flag of the preview one
 		for (unsigned i = 0; i < cmls.size(); ++i) {
 			unsigned flag = cmls.at(i)->execute();
 			// cout << flag << endl;

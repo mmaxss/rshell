@@ -11,17 +11,15 @@ void handler(int number);
 int main() {
 	while (1) {
 
-		signal(SIGINT, handler);
+		signal(SIGINT, handler);                                                //handl exit commands control+c
 		string str = "";
 
-		cout << "$";
+		cout << getenv("PWD") << "$ ";
 		getline(cin, str);
 
-		str = commentHandler(str); //check for comments
+		str = commentHandler(str);                                              //check for comments
 
-		multipleCmdl* a = new multipleCmdl(str);
-		// commandList* cmd = new commandList(str);
-		// cmd->execute();
+		multipleCmdl* a = new multipleCmdl(str);                                //create new object and execute it
 		a->execute();
 	}
 	return 0;
